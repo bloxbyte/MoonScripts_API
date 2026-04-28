@@ -77,6 +77,32 @@ app.post("/api/boosting", async (req, res) => {
       return res.status(400).json({ error: "Invalid Data type" });
     }
 
+    if (Topic === "Update") {
+      const { AccountType, Username, Object } = req.body;
+    
+      if (AccountType === "Main" && Object === "Rounds") {
+        if (!Username) {
+          return res.status(400).json({ error: "Missing Username" });
+        }
+    
+        const result = await pool.query(
+          "UPDATE Boosting_Data SET RoundCount = RoundCount + 1 WHERE MainAccount = $1 RETURNING RoundCount",
+          [Username]
+        );
+    
+        if (result.rows.length === 0) {
+          return res.status(404).json({ error: "Account not found" });
+        }
+    
+        return res.json({
+          success: true,
+          RoundCount: result.rows[0].roundcount
+        });
+      }
+    
+      return res.status(400).json({ error: "Invalid update request" });
+    }
+
     if (Topic === "Register") {
       const { AccountType, Username, MainAccount, AltsList } = req.body;
 
