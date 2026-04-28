@@ -20,7 +20,7 @@ app.all("/api/boosting", async (req, res) => {
 
   if (req.method === "POST") {
     const key = req.query.key;
-    const { Topic, accountType, Username, MainAccount, altList } = req.body;
+    const { Topic, AccountType, Username, MainAccount, AltsList } = req.body;
 
     if (!key) {
       return res.status(400).json({ error: "Missing key" });
@@ -49,7 +49,7 @@ app.all("/api/boosting", async (req, res) => {
           return res.status(403).json({ error: "Key expired" });
         }
   
-        if (accountType === "alt") {
+        if (AccountType === "Alt") {
           if (!MainAccount || !Username) {
             return res.status(400).json({ error: "Missing data" });
           }
@@ -80,12 +80,12 @@ app.all("/api/boosting", async (req, res) => {
           return res.json({ success: true, type: "alt verified" });
         }
   
-        if (accountType === "main") {
-          if (!Username || !altList) {
+        if (AccountType === "Main") {
+          if (!Username || !AltsList) {
             return res.status(400).json({ error: "Missing data" });
           }
   
-          const alts = altList.map(name => ({
+          const alts = AltsList.map(name => ({
             username: name,
             verified: false
           }));
