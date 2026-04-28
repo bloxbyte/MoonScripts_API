@@ -13,7 +13,7 @@ const pool = new Pool({
   }
 });
 
-app.all("/boosting", async (req, res) => {
+app.all("/api/boosting", async (req, res) => {
   if (req.method === "GET") {
     return res.status(200).end();
   }
