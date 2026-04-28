@@ -78,7 +78,7 @@ app.post("/api/boosting", async (req, res) => {
     }
 
     if (Topic === "Update") {
-      const { AccountType, Username, Object } = req.body;
+      const { AccountType, Username, Object, Value } = req.body;
     
       if (AccountType === "Main" && Object === "Rounds") {
         if (!Username) {
@@ -86,8 +86,8 @@ app.post("/api/boosting", async (req, res) => {
         }
     
         const result = await pool.query(
-          "UPDATE Boosting_Data SET RoundCount = RoundCount + 1 WHERE MainAccount = $1 RETURNING RoundCount",
-          [Username]
+          "UPDATE Boosting_Data SET RoundCount = $2 WHERE MainAccount = $1 RETURNING RoundCount",
+          [Username, Value]
         );
     
         if (result.rows.length === 0) {
