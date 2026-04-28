@@ -15,7 +15,62 @@ const pool = new Pool({
 
 app.all("/api/boosting", async (req, res) => {
   if (req.method === "GET") {
-    return res.status(200).end();
+    const { key, Topic, Data, Username } = req.query;
+  
+    if (!key) {
+      return res.status(400).json({ error: "Missing key" });
+    }
+  
+    try {
+      const result = await pool.query(
+        "SELECT * FROM Accounts WHERE Key = $1",
+        [key]
+      );
+  
+      if (result.rows.length === 0) {
+        return res.status(403).json({ error: "Invalid key" });
+      }
+  
+      const account = result.rows[0];
+  
+      const now = new Date();
+      if (account.keyexpiry && new Date(account.keyexpiry) < now) {
+        await pool.query(
+          "UPDATE Accounts SET Key = NULL, KeyExpiry = NULL WHERE Username = $1",
+          [account.username]
+        );
+  
+        return res.status(403).json({ error: "Key expired" });
+      }
+  
+      if (Topic === "Get") {
+        if (Data === "Rounds") {
+          if (!Username) {
+            return res.status(400).json({ error: "Missing Username" });
+          }
+  
+          const boosting = await pool.query(
+            "SELECT RoundCount FROM Boosting_Data WHERE MainAccount = $1",
+            [Username]
+          );
+  
+          if (boosting.rows.length === 0) {
+            return res.status(404).json({ error: "Account not found" });
+          }
+  
+          return res.json({
+            success: true,
+            RoundCount: boosting.rows[0].roundcount
+          });
+        }
+      }
+  
+      return res.status(400).json({ error: "Invalid request" });
+  
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Server error" });
+    }
   }
 
   if (req.method === "POST") {
