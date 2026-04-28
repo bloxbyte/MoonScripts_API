@@ -15,7 +15,8 @@ const pool = new Pool({
 
 app.all("/api/boosting", async (req, res) => {
   if (req.method === "GET") {
-    const { key, Topic, Data, Username } = req.query;
+    const key = req.query
+    const { Topic, Data, Username } = req.body;
   
     if (!key) {
       return res.status(400).json({ error: "Missing key" });
