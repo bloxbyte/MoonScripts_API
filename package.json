@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node api/boosting.js"
+    "start": "node boosting.js"
   },
   "dependencies": {
     "express": "^5.2.1",
