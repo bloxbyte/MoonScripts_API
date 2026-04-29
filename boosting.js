@@ -78,7 +78,32 @@ app.post("/api/boosting", async (req, res) => {
     }
 
     if (Topic === "Update") {
-      const { AccountType, Username, Object, Value } = req.body;
+      const { AccountType, MainAccount, Username, Object, Value } = req.body;
+
+      if (AccountType === "Alt" && Object === "Target") {
+        if (!Username || !MainAccount || !Value) {
+          return res.status(400).json({ error: "Missing data" });
+        }
+      
+        const tableName = "alts_" + MainAccount.replace(/[^a-zA-Z0-9_]/g, "");
+      
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS ${tableName} (
+            Username TEXT PRIMARY KEY,
+            Target TEXT
+          )
+        `);
+      
+        await pool.query(
+          `INSERT INTO ${tableName} (Username, Target)
+           VALUES ($1, $2)
+           ON CONFLICT (Username)
+           DO UPDATE SET Target = $2`,
+          [Username, Value]
+        );
+      
+        return res.json({ success: true });
+      }
     
       if (AccountType === "Main" && Object === "Rounds") {
         if (!Username) {
