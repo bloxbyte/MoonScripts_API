@@ -186,6 +186,20 @@ app.post("/api/boosting", async (req, res) => {
       return res.status(400).json({ error: "Invalid account type" });
     }
 
+    if (Topic === "ClearData") {
+      const { MainAccount } = req.body;
+    
+      if (!MainAccount) {
+        return res.status(400).json({ error: "Missing MainAccount" });
+      }
+    
+      const tableName = "alts_" + MainAccount.replace(/[^a-zA-Z0-9_]/g, "");
+    
+      await pool.query(`DROP TABLE IF EXISTS ${tableName}`);
+    
+      return res.json({ success: true });
+    }
+
     return res.status(400).json({ error: "Invalid topic" });
 
   } catch (err) {
