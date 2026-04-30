@@ -52,7 +52,7 @@ app.post("/api/boosting", async (req, res) => {
     }
 
     if (Topic === "Get") {
-      const { Data, Username } = req.body;
+      const { Data, Username, MainAccount } = req.body;
 
       if (Data === "Rounds") {
         if (!Username) {
@@ -73,6 +73,53 @@ app.post("/api/boosting", async (req, res) => {
           RoundCount: boosting.rows[0].roundcount
         });
       }
+
+      if (Data === "Players") {
+       if (!MainAccount) {
+          return res.status(400).json({ error: "Missing MainAccount" });
+        }
+      
+        const tableName = "alts_" + MainAccount.replace(/[^a-zA-Z0-9_]/g, "");
+      
+        const result = await pool.query(
+          `SELECT Username, Target FROM ${tableName}`
+        ); 
+      
+        const rows = result.rows;
+      
+        const output = [];
+      
+        const allPlayers = [MainAccount, ...rows.map(r => r.username)];
+      
+        for (let i = 0; i < allPlayers.length; i++) {
+          const player = allPlayers[i];
+      
+          let target = null;
+          let assassin = null;
+      
+          if (player === MainAccount) {
+            const found = rows.find(r => r.target === MainAccount);
+            if (found) assassin = found.username;
+          } else {
+            const row = rows.find(r => r.username === player);
+            if (row) target = row.target;
+      
+            const found = rows.find(r => r.target === player);
+            if (found) assassin = found.username;
+          }
+      
+          output.push({
+            Player: player,
+            Target: target,
+            Assassin: assassin
+          });
+        }
+      
+        return res.json({
+          success: true,
+          Players: output
+        });
+      }  
 
       return res.status(400).json({ error: "Invalid Data type" });
     }
