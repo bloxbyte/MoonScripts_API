@@ -61,7 +61,7 @@ app.post("/api/boosting", async (req, res) => {
 
         const boosting = await pool.query(
           "SELECT RoundCount FROM Boosting_Data WHERE MainAccount = $1",
-          [Username]
+          [MainAccount]
         );
 
         if (boosting.rows.length === 0) {
